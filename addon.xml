@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.module.plugin_zen" name="Plugin Zen" version="0.0.1" provider-name="Kaspar Winckler">
+  <extension point="xbmc.python.module" library="lib" />
+  <extension point="xbmc.addon.metadata">
+    <summary>Plugin Zen</summary>
+    <description>The zen of plugin development</description>
+    <license>GPLv3</license>
+  </extension>
+</addon>
