@@ -4,21 +4,17 @@ import sys
 import xbmcgui
 import xbmcplugin
 
-_ENCODING = "utf-8"
-
 
 def arg_decode(arg=sys.argv[2]):
     if arg:
-        return json.loads(base64.b64decode((arg[1:]).encode(_ENCODING)))
+        return json.loads(base64.b64decode((arg[1:]).encode()))
     else:
         return [], {}
 
 
 def arg_encode(*args, **kwargs):
     if args or kwargs:
-        return "?" + base64.b64encode(
-            json.dumps([args, kwargs]).encode(_ENCODING)
-        ).decode(_ENCODING)
+        return "?" + base64.b64encode(json.dumps([args, kwargs]).encode()).decode()
     else:
         return ""
 
