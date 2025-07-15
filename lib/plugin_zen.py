@@ -1,20 +1,23 @@
 import base64
 import json
 import sys
+import urllib.parse
 import xbmcgui
 import xbmcplugin
 
 
 def arg_decode(arg=sys.argv[2]):
     if arg:
-        return json.loads(base64.b64decode((arg[1:]).encode()))
+        return json.loads(base64.urlsafe_b64decode(urllib.parse.unquote(arg[1:])))
     else:
         return [], {}
 
 
 def arg_encode(*args, **kwargs):
     if args or kwargs:
-        return "?" + base64.b64encode(json.dumps([args, kwargs]).encode()).decode()
+        return "?" + urllib.parse.quote(
+            base64.b64encode(json.dumps([args, kwargs]).encode())
+        )
     else:
         return ""
 
