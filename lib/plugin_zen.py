@@ -34,33 +34,24 @@ def url_decode(url=sys.argv[0]):
 class _Plugin:
     def __init__(self):
         self._modes = {}
-        self._items = []
-
         self._url, self._mode, url_args = url_decode()
         self._handle = int(sys.argv[1])
         arg_args, self._kwargs = arg_decode()
         self._args = url_args if url_args else arg_args
 
-        self._cache_to_disc = True
-        self._update_listing = False
-
-    def _get_item(self, label=""):
-        return xbmcgui.ListItem(label=label, offscreen=True)
-
     def _register_mode(self, mode, is_folder=False, is_playable=False):
         def register(method):
-            def run(*args, **kwargs):
-                if is_playable:
-                    item = self._get_item()
-                    args = (item, *args)
-                try:
-                    succeeded = False
-                    method(*args, **kwargs)
-                    succeeded = True
-                finally:
-                    if is_playable:
-                        xbmcplugin.setResolvedUrl(self._handle, succeeded, item)
-                    elif is_folder:
+            if is_folder:
+
+                def run(*args, **kwargs):
+                    self._items = []
+                    self._cache_to_disc = True
+                    self._update_listing = False
+                    try:
+                        succeeded = False
+                        method(*args, **kwargs)
+                        succeeded = True
+                    finally:
                         xbmcplugin.addDirectoryItems(
                             self._handle, self._items, len(self._items)
                         )
@@ -70,6 +61,17 @@ class _Plugin:
                             self._update_listing,
                             self._cache_to_disc,
                         )
+            else:
+
+                def run(*args, **kwargs):
+                    item = xbmcgui.ListItem(offscreen=True)
+                    try:
+                        succeeded = False
+                        method(item, *args, **kwargs)
+                        succeeded = True
+                    finally:
+                        if is_playable:
+                            xbmcplugin.setResolvedUrl(self._handle, succeeded, item)
 
             run.is_folder = is_folder
             run.is_playable = is_playable
@@ -78,31 +80,30 @@ class _Plugin:
 
         return register
 
-    def register_item(self, mode):
+    def mode_item(self, mode):
         return self._register_mode(mode)
 
-    def register_folder(self, mode):
+    def mode_folder(self, mode):
         return self._register_mode(mode, is_folder=True)
 
-    def register_playable(self, mode):
+    def mode_playable(self, mode):
         return self._register_mode(mode, is_playable=True)
 
-    def add_item_by_url(self, label, url, is_folder=False, is_playable=True):
-        item = self._get_item(label)
+    def add_item_for_path(self, path, is_folder=False, is_playable=False):
+        item = xbmcgui.ListItem(offscreen=True)
         if is_playable:
             item.setProperty("isPlayable", "true")
         self._items.append(
             (
-                url,
+                path,
                 item,
                 is_folder,
             )
         )
         return item
 
-    def add_item_by_mode(self, label, mode, *args, **kwargs):
-        return self.add_item_by_url(
-            label,
+    def add_item(self, mode, *args, **kwargs):
+        return self.add_item_for_path(
             self._url + mode + arg_encode(*args, **kwargs),
             self._modes[mode].is_folder,
             self._modes[mode].is_playable,
