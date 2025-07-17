@@ -2,6 +2,7 @@ import base64
 import json
 import sys
 import urllib.parse
+import xbmc
 import xbmcgui
 import xbmcplugin
 
@@ -34,6 +35,7 @@ def url_decode(url=sys.argv[0]):
 class _Plugin:
     def __init__(self):
         self._modes = {}
+        self._show_log = False
         self._url, self._mode, url_args = url_decode()
         self._handle = int(sys.argv[1])
         arg_args, self._kwargs = arg_decode()
@@ -124,6 +126,12 @@ class _Plugin:
             return attr(self._handle, *args, **kwargs)
         else:
             return attr
+
+    def log(self, message):
+        xbmc.log(str(message), xbmc.LOGINFO if self._show_log else xbmc.LOGDEBUG)
+
+    def show_log(self, b):
+        self._show_log = b
 
 
 PLUGIN = _Plugin()
